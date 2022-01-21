@@ -1,0 +1,128 @@
+-- Intermediate SQL
+--- General function
+select 
+from
+where 
+group by 
+having 
+order by 
+limit 
+
+-- select funtion
+select order_id as "Total untuk Order", 
+sales "Total Sales", 
+profit "Profit", 
+quantity "Jumlah Pembelian",
+category "Kategori",
+sub_category "Sub Kategori",
+cost as "Cost"
+--total_cost,
+--total_profit 
+from datasource.order_details_csv
+
+
+---distinct 
+select distinct category
+from datasource.order_details_csv
+
+--- agregate count 
+select count(sub_category)
+from datasource.order_details_csv
+
+select percentile_cont(0.5) WITHIN GROUP(ORDER BY total_profit)
+from datasource.order_details_csv
+
+
+-- function case when
+select 
+	category,
+	case 
+		when lower(category)='furniture' then 'perabot'
+		when lower(category)='office supplies' then 'atk'
+		when lower(category)='technology' then 'Teknologi'
+	end 
+from datasource.order_details_csv
+
+-- function where
+ 
+select 
+order_id as "Total untuk Order",
+category "Kategori",
+sub_category "Sub Kategori",
+quantity "Jumlah Pembelian",
+sales "Total Sales", 
+profit "Profit"
+
+from datasource.order_details_csv
+where 
+	-- sub_category in ('Chairs', 'Tables')
+	category ='Furniture' and
+	(
+	sub_category like 'Chairs' or 
+	sub_category='Tables'
+	)
+
+	quantity >= 2 and 
+	quantity <= 3 and 
+	sales >= 30 and
+	sales <= 100
+
+-- fungsi grup by 
+
+select
+category "Kategori",
+sub_category "Sub Kategori",
+sum(quantity) "Jumlah Pembelian",
+sum(sales) "Total Sales", 
+sum(profit) "Profit"
+
+from datasource.order_details_csv
+where 
+	quantity >= 2 and 
+	quantity <= 3 and 
+	sales >= 30 and
+	sales <= 100
+	
+group by 1,2 --bisa diurutkan sesuai urutan penginputan select. membutuhkan agregate untuk mengkategorikan
+
+---function having : menampilkan data tertentu dari sebuat agregate 
+having sum(quantity) >= 200 and sum(sales) <= 10000
+
+---function order by : mengurutkan data
+order by category, sub_category 
+
+---function limit : membatasi data yang di tampilkan
+limit 5
+
+---mengurutkan sesuai keinginan kita
+select
+category "Kategori",
+sub_category "Sub Kategori",
+sum(quantity) "Jumlah Pembelian",
+sum(sales) "Total Sales", 
+sum(profit) "Profit"
+from datasource.order_details_csv
+where 
+	quantity >= 2 and 
+	quantity <= 3 and 
+	sales >= 30 and
+	sales <= 100
+	
+group by 1,2 
+having sum(quantity) >= 200 and sum(sales) <= 10000
+order by 
+category asc,
+case 
+	when sub_category = 'Furnishings' THEN 1
+	when sub_category = 'Supplies' THEN 2
+	when sub_category = 'Fasteners' THEN 3
+	when sub_category = 'Paper' THEN 4
+	when sub_category = 'Binders' THEN 5
+	else 6
+end 
+limit 4
+
+---contoh window function 
+SELECT sales, profit, quantity, category, sub_category, "cost",
+SUM("cost") OVER(PARTITION BY sub_category) as total_cost 
+FROM datasource.order_details_csv
